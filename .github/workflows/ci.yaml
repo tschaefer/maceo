@@ -1,0 +1,56 @@
+---
+name: CI
+
+on:   # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up faas-cli
+        run: |
+          curl -sSL https://cli.openfaas.com | sh
+      - name: Run presidio
+        run: |
+          docker compose -f contrib/docker-compose.yml up -d && \
+          docker run --rm --network faas alpine/curl:8.12.1 \
+            --retry 5 --retry-connrefused \
+            http://presidio-analyzer:3000/health
+          docker run --rm --network faas alpine/curl:8.12.1 \
+            --retry 5 --retry-connrefused \
+            http://presidio-anonymizer:3000/health
+      - name: Run function
+        run: |
+          faas-cli template store pull golang-middleware && \
+          mkdir .secrets && \
+          cp contrib/config .secrets/maceo && \
+          faas-cli build -f stack.yaml --tag sha && \
+          VERSION=$(awk -F ':' '/image/ { print $NF }' stack.yaml)
+          GIT_COMMIT=$(git rev-parse --short HEAD) && \
+          docker run --name maceo --rm -i -p 8080:8080 \
+            --network faas \
+            -e=OPENFAAS_NAME=maceo -e=OPENFAAS_NAMESPACE=openfaas-fn \
+            -e=jwt_auth_local=true -e=fprocess=./handler --detach \
+            --volume=${PWD}/.secrets:/var/openfaas/secrets \
+            ghcr.io/tschaefer/maceo:${VERSION}-${GIT_COMMIT} && \
+          docker run --rm --network faas alpine/curl:8.12.1 \
+            --retry 5 --retry-connrefused \
+            http://maceo:8080/health
+      - name: Run tests
+        run: |
+          curl --silent --request POST http://localhost:8080 \
+            --header "Content-Type: text/plain; charset=utf8" \
+            --data-binary  "@contrib/sample" > sample.anonymized && \
+          diff contrib/sample.anonymized sample.anonymized

@@ -1,0 +1,42 @@
+---
+name: Release
+
+on:   # yamllint disable-line rule:truthy
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Build and Release
+    permissions:
+      packages: write
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Set up faas-cli
+        run: |
+          curl -sSL https://cli.openfaas.com | sh
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull template
+        run: |
+          faas-cli template store pull golang-middleware
+      - name: Build and Push
+        run: |
+          faas-cli publish \
+            --platforms linux/amd64,linux/arm64 \
+            --build-label org.opencontainers.image.source=https://github.com/tschaefer/maceo \
+            --build-label org.opencontainers.image.licenses=MIT \
+            --build-label org.opencontainers.image.description="Analyze and anonymize data in real-time"

@@ -1,0 +1,11 @@
+---
+version: 1.0
+provider:
+  name: openfaas
+functions:
+  maceo:
+    lang: golang-middleware
+    handler: ./maceo
+    image: ghcr.io/tschaefer/maceo:0.0.1
+    secrets:
+      - maceo

@@ -1,0 +1,17 @@
+{
+    "upstreams": {
+        "analyze": "http://presidio-analyzer:3000",
+        "anonymize": "http://presidio-anonymizer:3000"
+    },
+    "entities": [
+        "CREDIT_CARD",
+        "EMAIL_ADDRESS",
+        "IBAN_CODE",
+        "IP_ADDRESS",
+        "LOCATION",
+        "PERSON",
+        "PHONE_NUMBER"
+    ],
+    "language": "en",
+    "score_threshold": 0.0
+}

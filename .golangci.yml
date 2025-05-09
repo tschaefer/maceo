@@ -1,0 +1,15 @@
+---
+version: 2
+linters:
+  settings:
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close
+    staticcheck:
+      checks:
+        - "all"
+        - "-ST1000"
+        - "-SA1006"
+formatters:
+  enable:
+    - gofmt
