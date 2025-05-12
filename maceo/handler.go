@@ -47,8 +47,13 @@ var Config FunctionConfig
 
 func Handle(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
+
 	if strings.HasSuffix(path, "/health") {
-		checkHealth(w, r)
+		if checkHealth() {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -99,11 +104,10 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkHealth(w http.ResponseWriter, r *http.Request) {
+func checkHealth() bool {
 	config := readConfig()
 	if config == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return false
 	}
 
 	endpoints := []string{
@@ -116,12 +120,11 @@ func checkHealth(w http.ResponseWriter, r *http.Request) {
 		_, err := http.Get(health)
 		if err != nil {
 			log.Printf("Error checking health: %s", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return false
 		}
 	}
 
-	w.WriteHeader(http.StatusOK)
+	return true
 }
 
 func readConfig() *FunctionConfig {
