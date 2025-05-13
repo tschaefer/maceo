@@ -43,8 +43,8 @@ faas-cli deploy --image=ghcr.io/tschaefer/maceo:0.1.0 --name=maceo
 This creates the required empty configuration secret for the function and
 deploys the function to your OpenFaaS instance.
 
-See [Blog Post](https://blog.tschaefer.org) for a detailed guide on how to set
-up with [OpenFaaS Edge](https://docs.openfaas.com/deployment/edge/).
+See [Blog Post](https://blog.tschaefer.org/posts/2025/05/13/analyze-and-anonymize-data-in-real-time/)
+for a detailed guide on how to set up with [faasd](https://docs.openfaas.com/deployment/edge/).
 
 ## Usage
 
