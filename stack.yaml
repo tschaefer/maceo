@@ -6,6 +6,6 @@ functions:
   maceo:
     lang: golang-middleware
     handler: ./maceo
-    image: ghcr.io/tschaefer/maceo:0.0.1
+    image: ghcr.io/tschaefer/maceo:0.1.0
     secrets:
       - maceo

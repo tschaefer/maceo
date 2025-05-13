@@ -41,13 +41,19 @@ type FunctionConfig struct {
 	ScoreThreshold float64           `json:"score_threshold"`
 }
 
+type FunctionVersion struct {
+	Version string `json:"version"`
+	Commit  string `json:"commit"`
+}
+
 const ConfigFilePath = "/var/openfaas/secrets/maceo"
 
 var Config FunctionConfig
 
 func Handle(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
+	versionHeaders(w)
 
+	path := r.URL.Path
 	if strings.HasSuffix(path, "/health") {
 		if checkHealth() {
 			w.WriteHeader(http.StatusOK)
@@ -125,6 +131,16 @@ func checkHealth() bool {
 	}
 
 	return true
+}
+
+func versionHeaders(w http.ResponseWriter) {
+	data, _ := os.ReadFile("static/version.json")
+
+	var version FunctionVersion
+	_ = json.Unmarshal(data, &version)
+
+	w.Header().Set("X-Maceo-Version", version.Version)
+	w.Header().Set("X-Maceo-Commit", version.Commit)
 }
 
 func readConfig() *FunctionConfig {

@@ -33,6 +33,11 @@ jobs:
       - name: Pull template
         run: |
           faas-cli template store pull golang-middleware
+      - name: Versioning
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          COMMIT=$(git rev-parse HEAD)
+          sed -i "s/sha/$COMMIT/;s/dev/$VERSION/" maceo/static/version.json
       - name: Build and Push
         run: |
           faas-cli publish \
