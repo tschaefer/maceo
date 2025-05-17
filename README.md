@@ -103,6 +103,7 @@ containing the following keys:
 - `entities`: The list of PII entities to detect and anonymize. (default: `nil`)
 - `language`: The language to use for PII detection. (default: `en`)
 - `score_threshold`: The minimum score for a PII entity to be considered detected. (default: `0.0`)
+- `anonymizers`: The anonymizer to use value replacement. (default: `nil`)
 
 Find an example configuration in the `contrib/config` file.
 

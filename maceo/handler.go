@@ -26,8 +26,9 @@ type AnalyzeResponse struct {
 }
 
 type AnonymizeRequest struct {
-	Text            string            `json:"text"`
-	AnalyzerResults []AnalyzeResponse `json:"analyzer_results"`
+	Text            string                 `json:"text"`
+	AnalyzerResults []AnalyzeResponse      `json:"analyzer_results"`
+	Anonymizers     map[string]interface{} `json:"anonymizers"`
 }
 
 type AnonymizeResponse struct {
@@ -35,10 +36,11 @@ type AnonymizeResponse struct {
 }
 
 type FunctionConfig struct {
-	Upstreams      map[string]string `json:"upstreams"`
-	Entities       []string          `json:"entities"`
-	Language       string            `json:"language"`
-	ScoreThreshold float64           `json:"score_threshold"`
+	Upstreams      map[string]string      `json:"upstreams"`
+	Entities       []string               `json:"entities"`
+	Language       string                 `json:"language"`
+	ScoreThreshold float64                `json:"score_threshold"`
+	Anonymizers    map[string]interface{} `json:"anonymizers"`
 }
 
 type FunctionVersion struct {
@@ -151,6 +153,7 @@ func readConfig() *FunctionConfig {
 	Config.Entities = nil
 	Config.Language = "en"
 	Config.ScoreThreshold = 0.0
+	Config.Anonymizers = nil
 
 	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
 		return &Config
@@ -215,6 +218,7 @@ func performAnonymization(input []byte, analyzeResponse []AnalyzeResponse) *Anon
 	anonymize := AnonymizeRequest{
 		Text:            string(input),
 		AnalyzerResults: analyzeResponse,
+		Anonymizers:     Config.Anonymizers,
 	}
 	jsonData, err := json.Marshal(anonymize)
 	if err != nil {
