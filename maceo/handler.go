@@ -12,10 +12,11 @@ import (
 )
 
 type AnalyzeRequest struct {
-	Text           string   `json:"text"`
-	Language       string   `json:"language"`
-	Entities       []string `json:"entities"`
-	ScoreThreshold float64  `json:"score_threshold"`
+	Text             string        `json:"text"`
+	Language         string        `json:"language"`
+	Entities         []string      `json:"entities"`
+	ScoreThreshold   float64       `json:"score_threshold"`
+	AdHocRecognizers []interface{} `json:"ad_hoc_recognizers"`
 }
 
 type AnalyzeResponse struct {
@@ -26,9 +27,9 @@ type AnalyzeResponse struct {
 }
 
 type AnonymizeRequest struct {
-	Text            string                 `json:"text"`
-	AnalyzerResults []AnalyzeResponse      `json:"analyzer_results"`
-	Anonymizers     map[string]interface{} `json:"anonymizers"`
+	Text            string            `json:"text"`
+	AnalyzerResults []AnalyzeResponse `json:"analyzer_results"`
+	Anonymizers     interface{}       `json:"anonymizers"`
 }
 
 type AnonymizeResponse struct {
@@ -36,11 +37,12 @@ type AnonymizeResponse struct {
 }
 
 type FunctionConfig struct {
-	Upstreams      map[string]string      `json:"upstreams"`
-	Entities       []string               `json:"entities"`
-	Language       string                 `json:"language"`
-	ScoreThreshold float64                `json:"score_threshold"`
-	Anonymizers    map[string]interface{} `json:"anonymizers"`
+	Upstreams        map[string]string `json:"upstreams"`
+	Entities         []string          `json:"entities"`
+	Language         string            `json:"language"`
+	ScoreThreshold   float64           `json:"score_threshold"`
+	Anonymizers      interface{}       `json:"anonymizers"`
+	AdHocRecognizers []interface{}     `json:"ad_hoc_recognizers"`
 }
 
 type FunctionVersion struct {
@@ -154,6 +156,7 @@ func readConfig() *FunctionConfig {
 	Config.Language = "en"
 	Config.ScoreThreshold = 0.0
 	Config.Anonymizers = nil
+	Config.AdHocRecognizers = nil
 
 	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
 		return &Config
@@ -176,10 +179,11 @@ func readConfig() *FunctionConfig {
 
 func performAnalysis(input []byte) *[]AnalyzeResponse {
 	analyze := AnalyzeRequest{
-		Text:           string(input),
-		Language:       Config.Language,
-		Entities:       Config.Entities,
-		ScoreThreshold: Config.ScoreThreshold,
+		Text:             string(input),
+		Language:         Config.Language,
+		Entities:         Config.Entities,
+		ScoreThreshold:   Config.ScoreThreshold,
+		AdHocRecognizers: Config.AdHocRecognizers,
 	}
 	jsonData, err := json.Marshal(analyze)
 	if err != nil {
